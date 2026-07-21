@@ -1,0 +1,13 @@
+packages:
+  - "apps/*"
+  - "packages/*"
+
+allowBuilds:
+  "@nestjs/core": true
+  "@prisma/engines": true
+  esbuild: true
+  prisma: true
+
+minimumReleaseAgeExclude:
+  # First-party SDK releases are consumed by this reference App immediately.
+  - "@vekil/app-sdk"

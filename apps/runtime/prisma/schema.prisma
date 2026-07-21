@@ -1,0 +1,91 @@
+generator client {
+  provider     = "prisma-client"
+  output       = "../src/generated/prisma"
+  moduleFormat = "cjs"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum RuntimeCompletionStatus {
+  CONNECTED
+  FAILED
+}
+
+model RuntimeAuthorizationSession {
+  state_hash                  String    @id
+  installation_id             String
+  connection_id               String
+  connection_revision         Int
+  authorization_contract_hash String
+  app_version_id              String
+  requested_permission_keys   String[]  @default([])
+  encrypted_code_verifier     String
+  return_url                  String
+  expires_at                  DateTime
+  consumed_at                 DateTime?
+  created_at                  DateTime  @default(now())
+
+  @@index([connection_id, connection_revision, expires_at])
+  @@index([installation_id, expires_at])
+  @@map("runtime_authorization_sessions")
+}
+
+model RuntimeCredential {
+  connection_id                String
+  connection_revision          Int
+  installation_id              String
+  authorization_contract_hash  String
+  authorized_app_version_id    String
+  runtime_account_reference    String
+  provider_account_id          String
+  account_label                String
+  granted_permission_keys      String[]  @default([])
+  encrypted_payload            String
+  access_token_expires_at      DateTime
+  refresh_lease_expires_at     DateTime?
+  created_at                   DateTime  @default(now())
+  updated_at                   DateTime  @updatedAt
+
+  @@id([connection_id, connection_revision])
+  @@index([installation_id])
+  @@index([access_token_expires_at])
+  @@map("runtime_credentials")
+}
+
+model RuntimeCompletion {
+  token_hash                  String    @id
+  installation_id             String
+  connection_id               String
+  connection_revision         Int
+  authorization_contract_hash String
+  app_version_id              String
+  status                      RuntimeCompletionStatus
+  runtime_account_reference   String?
+  account_label               String?
+  granted_permission_keys     String[]  @default([])
+  error_code                  String?
+  error_message               String?
+  error_retryable             Boolean?
+  expires_at                  DateTime
+  consumed_at                 DateTime?
+  created_at                  DateTime  @default(now())
+
+  @@index([connection_id, connection_revision, expires_at])
+  @@index([installation_id, expires_at])
+  @@map("runtime_completions")
+}
+
+model RuntimeSignatureReplay {
+  replay_key               String    @id
+  issuer                   String
+  audience                 String
+  key_id                   String
+  nonce_hash               String
+  expires_at               DateTime
+  created_at               DateTime  @default(now())
+
+  @@index([expires_at])
+  @@map("runtime_signature_replays")
+}

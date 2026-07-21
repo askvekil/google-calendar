@@ -1,0 +1,47 @@
+{
+  "name": "vekil-google-calendar",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Open-source Google Calendar Remote App for Vekil.",
+  "license": "Apache-2.0",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/askvekil/google-calendar.git"
+  },
+  "engines": {
+    "node": ">=22"
+  },
+  "packageManager": "pnpm@11.7.0",
+  "type": "module",
+  "scripts": {
+    "dev": "pnpm --filter @vekil/google-calendar-runtime dev",
+    "start": "pnpm --filter @vekil/google-calendar-runtime start",
+    "build": "pnpm db:generate && pnpm -r --if-present build",
+    "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
+    "test": "pnpm -r --if-present test",
+    "test:integration": "vitest run --config vitest.integration.config.ts",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "definition:build": "pnpm --filter @vekil/google-calendar-app definition:build",
+    "definition:validate": "pnpm --filter @vekil/google-calendar-app definition:validate",
+    "setup:local": "pnpm --filter @vekil/google-calendar-app setup:local",
+    "smoke:provider": "tsx scripts/provider-smoke.ts",
+    "keys": "pnpm --filter @vekil/google-calendar-app keys",
+    "db:generate": "pnpm --filter @vekil/google-calendar-runtime prisma:generate",
+    "db:migrate": "pnpm --filter @vekil/google-calendar-runtime prisma:migrate",
+    "db:migrate:deploy": "pnpm --filter @vekil/google-calendar-runtime prisma:migrate:deploy",
+    "postinstall": "pnpm db:generate"
+  },
+  "devDependencies": {
+    "@vekil/google-calendar-app": "workspace:*",
+    "@eslint/js": "10.0.1",
+    "@types/node": "26.1.0",
+    "dotenv": "17.2.3",
+    "eslint": "10.6.0",
+    "prettier": "3.9.4",
+    "tsx": "4.23.0",
+    "typescript": "6.0.3",
+    "typescript-eslint": "8.62.1",
+    "vitest": "4.1.9"
+  }
+}

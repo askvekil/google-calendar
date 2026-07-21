@@ -1,0 +1,35 @@
+{
+  "name": "@vekil/google-calendar-app",
+  "version": "2.0.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "require": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.build.json",
+    "definition:build": "pnpm build && vekil-app build ./vekil.app.mjs --out ../../artifacts",
+    "definition:validate": "pnpm build && vekil-app conformance ./vekil.app.mjs",
+    "keys": "vekil-app keys ../../artifacts/vekil.manifest.json",
+    "setup:local": "tsx --no-cache scripts/setup-local.ts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run --passWithNoTests"
+  },
+  "dependencies": {
+    "@vekil/app-sdk": "0.4.0",
+    "luxon": "3.7.2",
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/luxon": "3.7.1",
+    "@types/node": "26.1.0",
+    "tsx": "4.23.0",
+    "typescript": "6.0.3",
+    "vitest": "4.1.9"
+  }
+}
