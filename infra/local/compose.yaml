@@ -1,0 +1,20 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: vekil_google_calendar
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_USER: postgres
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d vekil_google_calendar"]
+      interval: 2s
+      timeout: 3s
+      retries: 20
+    ports:
+      - "54321:5432"
+    restart: unless-stopped
+    volumes:
+      - google-calendar-postgres:/var/lib/postgresql/data
+
+volumes:
+  google-calendar-postgres:

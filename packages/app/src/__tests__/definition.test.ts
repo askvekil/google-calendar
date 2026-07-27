@@ -80,12 +80,12 @@ describe("Google Calendar App Definition", () => {
       (intent) => intent.id === bindings.intentId(GoogleCalendarIntentKey.MEETING_CREATE)
     );
     const meetingProperties = meetingIntent?.inputSchema.properties as
-      | Record<string, Record<string, unknown>>
-      | undefined;
+      Record<string, Record<string, unknown>> | undefined;
 
     expect(meetingProperties?.["requester-email"]).toMatchObject({
       [appContactIdentityAttributeJsonSchemaKey]: AppContactIdentityAttribute.EMAIL,
       format: "email",
+      title: "Requester email",
       type: "string"
     });
     expect(meetingProperties?.["attendee-emails"]).not.toHaveProperty(
@@ -111,9 +111,7 @@ describe("Google Calendar App Definition", () => {
     expect(
       manifest.outcomes.find(
         (outcome) =>
-          outcome.id === bindings.outcomeId(
-            GoogleCalendarOutcomeKey.RESCHEDULE_SLOT_UNAVAILABLE
-          )
+          outcome.id === bindings.outcomeId(GoogleCalendarOutcomeKey.RESCHEDULE_SLOT_UNAVAILABLE)
       )
     ).toMatchObject({
       nextActions: [

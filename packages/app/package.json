@@ -15,7 +15,6 @@
     "definition:build": "pnpm build && vekil-app build ./vekil.app.mjs --out ../../artifacts",
     "definition:validate": "pnpm build && vekil-app conformance ./vekil.app.mjs",
     "keys": "vekil-app keys ../../artifacts/vekil.manifest.json",
-    "setup:local": "tsx --no-cache scripts/setup-local.ts",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test": "vitest run --passWithNoTests"

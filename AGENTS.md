@@ -8,6 +8,9 @@ This repository is an independently deployed Vekil Remote App.
   execution, and App-specific tests.
 - `apps/runtime` owns OAuth, credentials, encryption, persistence, signing,
   replay protection, and HTTP hosting.
+- `scripts` owns deterministic local lifecycle and controlled provider checks.
+- `infra/local` owns only this Runtime's isolated local dependencies.
+- `docs` explains the public authoring, deployment, and verification workflows.
 - Import Vekil contracts only from `@vekil/app-sdk` or
   `@vekil/app-sdk/runtime`. Never import private Vekil workspace packages.
 - Google credentials and tokens never enter Vekil or the App Definition.
@@ -17,6 +20,7 @@ This repository is an independently deployed Vekil Remote App.
 
 ## Before Finishing
 
-Run `pnpm typecheck`, `pnpm test`, `pnpm lint`, and `pnpm definition:validate`.
+Run `pnpm typecheck`, `pnpm test`, `pnpm lint`, `pnpm definition:validate`,
+and `pnpm build`.
 Run `pnpm test:integration` when changing OAuth, credentials, replay protection,
 or database transactions.

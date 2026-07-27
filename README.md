@@ -1,109 +1,113 @@
 # Google Calendar for Vekil
 
-An open-source reference Remote App maintained by
-[@komronrakhim](https://x.com/komronrakhim). It finds safe meeting times and,
-after the required approval, creates, reschedules, or cancels Google Calendar
-events.
+Google Calendar is the reference Remote App for Vekil. It lets a Vekil:
 
-The App demonstrates a complete production-shaped integration:
+- answer availability questions without exposing private event details;
+- find meeting times inside the owner's working hours;
+- create approved meetings and send invitations;
+- reschedule or cancel an existing event for authenticated requesters;
+- respect notice periods and buffers before every calendar write.
 
-- Google OAuth with encrypted token storage;
-- calendar discovery and free/busy checks;
-- working days, local hours, notice, and meeting buffers;
-- progressive meeting coordination with typed choices;
-- a fresh availability check immediately before every write;
-- signed Runtime requests, replay protection, and idempotent execution;
-- explicit approval for create, reschedule, and cancel actions.
+The repository contains both the App Definition shown by Vekil and the
+independently deployed Runtime that connects to Google.
 
-## How a meeting request works
+## Try it locally
 
-The App first learns the meeting purpose and preferred window. It can then
-offer suitable times, understand a later selection such as “option 2”, and ask
-for the requester's invitation email only after a time is selected. The event
-is created only after approval.
-
-Availability and writes always respect the settings chosen during installation.
-Request details such as the purpose, selected time, and requester email stay
-with that request rather than becoming permanent App settings.
-
-## Repository layout
-
-```text
-packages/app/    App Definition, contracts, Google client, planning, execution
-apps/runtime/    NestJS HTTP Runtime, OAuth, persistence, encrypted credentials
-scripts/         Controlled provider smoke test
-artifacts/       Local generated files and the Manifest downloaded from Builder
-```
-
-The repository depends only on the public `@vekil/app-sdk` package. Google
-client secrets, access tokens, refresh tokens, and encryption keys stay in the
-Runtime environment and are never placed in the App Definition.
-
-## Requirements
+### Requirements
 
 - Node.js 22 or newer;
 - pnpm 11;
-- PostgreSQL;
-- a Vekil account with App authoring access;
-- a Google Cloud OAuth client with Google Calendar API enabled.
+- Docker;
+- a sibling checkout of `askvekil/vekil.me`;
+- a Google OAuth web client with Calendar API enabled.
 
-## Local development
+### 1. Start Vekil
 
-1. Install dependencies:
+From the `vekil.me` repository:
 
-   ```bash
-   pnpm install
-   ```
+```bash
+pnpm install
+pnpm dev:clean
+```
 
-2. Copy `.env.example` to `.env` and add the Google OAuth client credentials.
+This starts the product at `http://localhost:3000`.
 
-3. Build the App Definition:
+### 2. Configure Google OAuth
 
-   ```bash
-   pnpm definition:build
-   ```
+From this repository:
 
-4. In Vekil, open **Apps → Build your App → Import a Remote App** and import
-   `artifacts/definition.json`.
+```bash
+pnpm install
+pnpm local:env
+```
 
-5. Prepare a test version in Builder, then download its Manifest to
-   `artifacts/vekil.manifest.json`.
+Add `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` to the
+generated `.env`. The OAuth client must allow this redirect URI:
 
-6. Generate local Runtime secrets from that Manifest:
+```text
+http://localhost:4100/oauth/google/callback
+```
 
-   ```bash
-   pnpm setup:local
-   ```
+See [Google Cloud setup](docs/google-cloud-setup.md) for the complete provider
+configuration.
 
-7. Create the Runtime database and apply migrations:
+### 3. Start the App
 
-   ```bash
-   pnpm db:migrate
-   ```
+```bash
+pnpm dev:clean
+```
 
-8. Start the Runtime:
+The command resets only this Runtime's local database, compiles the Definition,
+prepares and publishes the local App through Vekil, configures protocol
+signing, starts the Runtime, and prints the exact installation URL.
 
-   ```bash
-   pnpm dev
-   ```
+Open that URL, create or sign in to a Vekil account, install Google Calendar,
+connect a Google account, and configure the calendar rules. A public meeting
+request can then be approved in the Vekil inbox and verified in Google
+Calendar.
 
-9. Return to Builder and test the prepared version.
+For repeat development without resetting Runtime credentials:
 
-Prepare and test a new version after changing the Definition or Runtime
-contract. The Runtime refuses to start when its URL, Manifest, or signing
-credentials do not agree.
+```bash
+pnpm dev:local
+```
 
-## Google OAuth
+The detailed workflow is in [Local development](docs/local-development.md).
 
-`GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` belong to the
-deployed Runtime. Configure the callback URL shown by your deployment as an
-authorized redirect URI in Google Cloud.
+## Repository map
 
-During installation, the user chooses App settings such as the calendar,
-default duration, available days and hours, notice, and buffers. OAuth tokens
-remain encrypted in the Runtime database.
+```text
+packages/app/
+  Definition, App-local contracts, planning, provider adapter, execution
 
-## Verification
+apps/runtime/
+  NestJS host, OAuth, encrypted credentials, protocol verification, storage
+
+scripts/
+  Deterministic local lifecycle and controlled provider checks
+
+infra/local/
+  Isolated PostgreSQL service for the Runtime
+
+docs/
+  Architecture, Definition, provider setup, and local verification
+```
+
+## Design and security
+
+The Runtime owns the Google OAuth client, provider tokens, encrypted credential
+storage, and Google API calls. Tokens never enter the App Definition or Vekil.
+Vekil sends signed, scoped requests; the Runtime verifies each request,
+protects against replay, and returns typed outcomes.
+
+Calendar writes are idempotent. Availability is checked again immediately
+before create or reschedule, so a time that became busy is not silently booked.
+Runtime and provider failures fail closed rather than simulating success.
+
+Read [Architecture](docs/architecture.md) and
+[App Definition](docs/app-definition.md) for the implementation model.
+
+## Quality gates
 
 ```bash
 pnpm typecheck
@@ -111,8 +115,12 @@ pnpm test
 pnpm lint
 pnpm definition:validate
 pnpm test:integration
+pnpm build
 ```
 
-`pnpm smoke:provider` uses an explicit controlled Google account. It performs
-token refresh, calendar discovery, and free/busy reads. Create, update, and
-cancel are enabled only when `GOOGLE_CALENDAR_ACCEPTANCE_ALLOW_WRITES=true`.
+The optional provider smoke test is documented in
+[Local development](docs/local-development.md#controlled-provider-smoke-test).
+
+## License
+
+Apache-2.0

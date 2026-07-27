@@ -332,8 +332,7 @@ export function createGoogleCalendarDefinition({
           "time-min": "ISO 8601 preferred window start",
           "time-max": "ISO 8601 preferred window end",
           purpose: "Why the requester wants to meet",
-          "requester-email":
-            "The requester's own email address that should receive the invitation",
+          "requester-email": "The requester's own email address that should receive the invitation",
           "attendee-emails":
             "Optional additional guest email addresses; never the owner's email address"
         },
@@ -367,7 +366,7 @@ export function createGoogleCalendarDefinition({
             "requester-email": {
               type: "string",
               format: "email",
-              title: "Your invitation email",
+              title: "Requester email",
               description:
                 "The requester's own email address that should receive the meeting invitation.",
               [appContactIdentityAttributeJsonSchemaKey]: AppContactIdentityAttribute.EMAIL
@@ -992,10 +991,7 @@ export function createGoogleCalendarDefinition({
         key: "ask-availability",
         intentKey: GoogleCalendarIntentKey.AVAILABILITY_ASK,
         label: localized("Ask availability", "Узнать свободное время"),
-        description: localized(
-          "Ask what time could work.",
-          "Узнать, какое время может подойти."
-        ),
+        description: localized("Ask what time could work.", "Узнать, какое время может подойти."),
         capabilityKeys: [GoogleCalendarCapabilityKey.AVAILABILITY_READ],
         allowedOrigins: [AppOrigin.PUBLIC_GUEST, AppOrigin.PUBLIC_AUTHENTICATED],
         riskLevel: AppRiskLevel.LOW
