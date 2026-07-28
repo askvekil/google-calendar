@@ -2,7 +2,7 @@ import type {
   AppInstallationConnectionStatus,
   AppInstallationGrant,
   AppRuntimeErrorCode
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 
 export interface GoogleCalendarConnectionIdentity {
   authorizationContractHash: string;

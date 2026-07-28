@@ -11,8 +11,7 @@ This repository is an independently deployed Vekil Remote App.
 - `scripts` owns deterministic local lifecycle and controlled provider checks.
 - `infra/local` owns only this Runtime's isolated local dependencies.
 - `docs` explains the public authoring, deployment, and verification workflows.
-- Import Vekil contracts only from `@vekil/app-sdk` or
-  `@vekil/app-sdk/runtime`. Never import private Vekil workspace packages.
+- Import Vekil contracts only from the documented `@vekil/app-sdk` entrypoints.
 - Google credentials and tokens never enter Vekil or the App Definition.
 - Runtime behavior is fail-closed. Do not simulate provider success.
 - Prisma fields use `snake_case`; enum types use `PascalCase`; enum values use

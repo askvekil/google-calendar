@@ -65,8 +65,8 @@ Google-specific concepts remain in this repository:
 - Google API error mapping;
 - provider idempotency.
 
-The App consumes only public contracts from `@vekil/app-sdk` and
-`@vekil/app-sdk/runtime`.
+The App consumes only public contracts from `@vekil/app-sdk` and its documented
+subpaths.
 
 ## Failure and retry behavior
 

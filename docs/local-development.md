@@ -1,80 +1,78 @@
 # Local development
 
-The local workflow uses two sibling repositories:
+The App repository is independent from Vekil source code. Local development
+uses the same public Builder flow as any other Remote App:
 
-```text
-workspace/
-  vekil.me/
-  vekil-google-calendar/
-```
+1. build a portable App Definition;
+2. import it in Builder;
+3. prepare one immutable test candidate;
+4. run the Runtime with that candidate's downloaded manifest;
+5. test and release the same candidate.
 
-If the repositories are elsewhere, set `VEKIL_CORE_DIR` in this repository's
-`.env`.
-
-## Clean start
-
-### Terminal 1: Vekil
-
-```bash
-cd ../vekil.me
-pnpm install
-pnpm dev:clean
-```
-
-Wait for Web on port `3000`, API on `4000`, and the worker to become ready.
-
-### Terminal 2: Google Calendar
-
-On the first run:
+## Prepare the App
 
 ```bash
 pnpm install
-pnpm local:env
+pnpm local:reset
 ```
 
-Add the Google OAuth client values to `.env`, then run:
+`local:reset`:
 
-```bash
-pnpm dev:clean
-```
-
-`dev:clean`:
-
-1. stops only Runtime processes owned by this repository;
+1. stops Runtime processes owned by this repository;
 2. resets the isolated PostgreSQL container on port `54321`;
-3. applies Runtime migrations;
-4. compiles and validates the current Definition;
-5. prepares an immutable local App candidate in Vekil;
-6. configures Runtime signing for that candidate;
-7. starts the Runtime on port `4100`;
-8. tests and publishes the candidate through the normal App lifecycle;
-9. prints the exact installation URL.
+3. creates `.env` and preserves any existing secrets;
+4. applies Runtime migrations;
+5. builds `artifacts/definition.json`.
 
-Secrets already present in `.env` are preserved. Retired variables are removed
-when the environment is prepared.
+Add `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` to `.env`
+after the first run. See [Google Cloud setup](google-cloud-setup.md).
 
-Use this during normal iteration:
+Use this command when the Runtime database should be preserved:
 
 ```bash
-pnpm dev:local
+pnpm local:prepare
 ```
 
-It preserves the Runtime database while rebuilding and republishing the current
-Definition.
+## Prepare a Builder candidate
+
+1. Open `/apps/build/new/remote` in the Vekil product.
+2. Import `artifacts/definition.json`.
+3. Open the created App project.
+4. Choose **Prepare test**.
+5. Download the generated manifest.
+6. Save it as `artifacts/vekil.manifest.json`.
+
+Do not edit the manifest or reuse it for another candidate.
+
+## Start and test the Runtime
+
+```bash
+pnpm local:run
+```
+
+The command derives a Runtime signing key for the downloaded manifest, starts
+the service on port `4100`, waits for readiness, and prints the Builder URL.
+
+Return to the same App project and run the Runtime test. Builder verifies the
+deployed protocol against the exact candidate manifest. Release or submit only
+after that test passes.
+
+When the Definition changes, rebuild it, import the new file into the existing
+project, and prepare a new candidate. A manifest from an older candidate must
+not be reused.
 
 ## End-to-end acceptance flow
 
-1. Open the installation URL printed by `pnpm dev:clean`.
-2. Register a fresh Vekil account.
-3. Install Google Calendar.
-4. Choose **Connect Google Calendar**.
-5. Authorize the Google account.
-6. Select a calendar and scheduling preferences.
-7. Open the account's public Vekil page in a private browser window.
-8. Ask to schedule a meeting with a purpose, duration, and preferred time.
-9. Provide the requester email when a concrete slot is selected.
-10. Approve the request from the Vekil inbox.
-11. Confirm that the request completes and the event exists in Google Calendar.
+1. Release the tested candidate from Builder.
+2. Open its App page and install Google Calendar.
+3. Choose **Connect Google Calendar**.
+4. Authorize the Google account.
+5. Select a calendar and scheduling preferences.
+6. Open the account's public Vekil page in a private browser window.
+7. Ask to schedule a meeting with a purpose, duration, and preferred time.
+8. Select a proposed time and provide the requester email.
+9. Approve the request from the Vekil request list.
+10. Confirm that the request completes and the event exists in Google Calendar.
 
 This flow exercises the real OAuth, Runtime protocol, worker, provider API,
 approval, and outcome rendering. There is no simulated provider success.
@@ -88,6 +86,7 @@ pnpm infra:down
 pnpm infra:reset
 pnpm definition:build
 pnpm definition:validate
+pnpm runtime:configure
 pnpm db:migrate
 ```
 

@@ -90,7 +90,11 @@ export const googleCalendarSchedulingConstraintsSchema = z.strictObject({
   workingDayEnd: z.string().regex(/^\d{2}:\d{2}$/),
   bufferBeforeMinutes: z.number().int().min(0).max(240),
   bufferAfterMinutes: z.number().int().min(0).max(240),
-  minimumNoticeMinutes: z.number().int().min(0).max(60 * 24 * 90)
+  minimumNoticeMinutes: z
+    .number()
+    .int()
+    .min(0)
+    .max(60 * 24 * 90)
 });
 
 export const defaultGoogleCalendarSchedulingConstraints: GoogleCalendarSchedulingConstraints = {

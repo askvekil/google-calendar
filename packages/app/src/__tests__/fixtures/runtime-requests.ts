@@ -1,14 +1,13 @@
 import {
   appContextProtocolVersion,
-  compileAppDefinitionOrThrow,
   appExecuteActionRequestSchema,
   appPlanActionRequestSchema,
   appProtocolVersion,
   type AppExecuteActionRequest,
   type AppPlanActionRequest,
   type JsonObject
-} from "@vekil/app-sdk";
-import { createAppRuntimeBindings } from "@vekil/app-sdk/runtime";
+} from "@vekil/app-sdk/runtime";
+import { createAppTestKit } from "@vekil/app-sdk/testing";
 import {
   GoogleCalendarActionKey,
   GoogleCalendarCapabilityKey,
@@ -16,25 +15,11 @@ import {
   createGoogleCalendarDefinition
 } from "../..";
 
-export const googleCalendarTestManifest = compileAppDefinitionOrThrow(
-  createGoogleCalendarDefinition({ baseUrl: "https://calendar-runtime.test" }),
-  {
-    appOfficial: false,
-    appId: "calendar-runtime-test",
-    slug: "calendar-runtime-test",
-    releaseVersion: "1.0.0",
-    developer: {
-      id: "builder-test",
-      handle: "@test",
-      name: "Test Developer",
-      verified: false,
-      officialTeamMember: false
-    }
-  }
+const googleCalendarTestKit = createAppTestKit(
+  createGoogleCalendarDefinition({ baseUrl: "https://calendar-runtime.test" })
 );
-export const googleCalendarTestBindings = createAppRuntimeBindings(
-  googleCalendarTestManifest
-);
+export const googleCalendarTestManifest = googleCalendarTestKit.manifest;
+export const googleCalendarTestBindings = googleCalendarTestKit.bindings;
 export const googleCalendarTestAppVersionId = "calendar-runtime-test-version-1";
 
 export function createCalendarExecutionRequest({
@@ -72,9 +57,7 @@ export function createCalendarPlanRequest({
   intentKey: GoogleCalendarIntentKey;
   requesterDisplayName?: string | null;
 }): AppPlanActionRequest {
-  const actionId = googleCalendarTestBindings.actionId(
-    GoogleCalendarActionKey.CREATE_EVENT
-  );
+  const actionId = googleCalendarTestBindings.actionId(GoogleCalendarActionKey.CREATE_EVENT);
 
   return appPlanActionRequestSchema.parse({
     protocolVersion: appProtocolVersion,

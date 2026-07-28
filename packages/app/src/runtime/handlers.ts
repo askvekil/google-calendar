@@ -1,11 +1,9 @@
 import {
   AppRuntimeHealthStatus,
   appProtocolVersion,
-  type AppManifest,
-  type AppRuntimeHealthResponse
-} from "@vekil/app-sdk";
-import {
   createAppRuntimeBindings,
+  type AppManifest,
+  type AppRuntimeHealthResponse,
   type AppRuntimeV1Handlers
 } from "@vekil/app-sdk/runtime";
 import type { GoogleCalendarProvider } from "../provider/calendar-client";

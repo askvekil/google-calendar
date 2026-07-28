@@ -6,7 +6,7 @@ import {
   type AppPlanActionRequest,
   type AppPlanActionResponse,
   type JsonObject
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 import type { AppRuntimeBindings } from "@vekil/app-sdk/runtime";
 import {
   GoogleCalendarActionKey,
@@ -138,17 +138,14 @@ function planCreateEvent(
     attendeeEmails,
     calendarId,
     createGoogleMeet: true,
-    description: [
-      `Purpose: ${purpose}`,
-      `Requested through Vekil by ${requesterReference}.`
-    ].join("\n\n"),
+    description: [`Purpose: ${purpose}`, `Requested through Vekil by ${requesterReference}.`].join(
+      "\n\n"
+    ),
     end,
     idempotencyKey: request.context.execution["idempotency-key"],
     schedulingConstraints,
     start,
-    summary:
-      readString(request.input, "title") ??
-      buildMeetingSummary(purpose, requesterName),
+    summary: readString(request.input, "title") ?? buildMeetingSummary(purpose, requesterName),
     timezone
   });
 }
@@ -293,15 +290,10 @@ function readSchedulingConstraints(
     (value): value is GoogleCalendarWeekday =>
       Object.values(GoogleCalendarWeekday).includes(value as GoogleCalendarWeekday)
   );
-  const minimumNoticeHours = readInteger(
-    settings,
-    GoogleCalendarSettingKey.MINIMUM_NOTICE_HOURS
-  );
+  const minimumNoticeHours = readInteger(settings, GoogleCalendarSettingKey.MINIMUM_NOTICE_HOURS);
   const candidate = {
     workingDays:
-      workingDays.length > 0
-        ? workingDays
-        : defaultGoogleCalendarSchedulingConstraints.workingDays,
+      workingDays.length > 0 ? workingDays : defaultGoogleCalendarSchedulingConstraints.workingDays,
     workingDayStart:
       readString(settings, GoogleCalendarSettingKey.WORKING_DAY_START) ??
       defaultGoogleCalendarSchedulingConstraints.workingDayStart,
@@ -315,8 +307,8 @@ function readSchedulingConstraints(
       readInteger(settings, GoogleCalendarSettingKey.BUFFER_AFTER_MINUTES) ??
       defaultGoogleCalendarSchedulingConstraints.bufferAfterMinutes,
     minimumNoticeMinutes:
-      (minimumNoticeHours ??
-        defaultGoogleCalendarSchedulingConstraints.minimumNoticeMinutes / 60) * 60
+      (minimumNoticeHours ?? defaultGoogleCalendarSchedulingConstraints.minimumNoticeMinutes / 60) *
+      60
   };
   const parsed = googleCalendarSchedulingConstraintsSchema.safeParse(candidate);
 

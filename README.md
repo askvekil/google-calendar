@@ -18,27 +18,17 @@ independently deployed Runtime that connects to Google.
 - Node.js 22 or newer;
 - pnpm 11;
 - Docker;
-- a sibling checkout of `askvekil/vekil.me`;
+- a Vekil account with App building access;
+- a local or hosted Vekil product available in the browser;
 - a Google OAuth web client with Calendar API enabled.
 
-### 1. Start Vekil
-
-From the `vekil.me` repository:
-
-```bash
-pnpm install
-pnpm dev:clean
-```
-
-This starts the product at `http://localhost:3000`.
-
-### 2. Configure Google OAuth
+### 1. Configure Google OAuth
 
 From this repository:
 
 ```bash
 pnpm install
-pnpm local:env
+pnpm local:reset
 ```
 
 Add `GOOGLE_CALENDAR_CLIENT_ID` and `GOOGLE_CALENDAR_CLIENT_SECRET` to the
@@ -51,28 +41,31 @@ http://localhost:4100/oauth/google/callback
 See [Google Cloud setup](docs/google-cloud-setup.md) for the complete provider
 configuration.
 
-### 3. Start the App
+### 2. Import the Definition
 
-```bash
-pnpm dev:clean
+Open `/apps/build/new/remote` in Vekil and import
+`artifacts/definition.json`. Prepare a test candidate, then download its
+manifest to:
+
+```text
+artifacts/vekil.manifest.json
 ```
 
-The command resets only this Runtime's local database, compiles the Definition,
-prepares and publishes the local App through Vekil, configures protocol
-signing, starts the Runtime, and prints the exact installation URL.
+The manifest is the Runtime contract for that exact candidate. Keep it
+unchanged and do not reuse it after the Definition changes.
 
-Open that URL, create or sign in to a Vekil account, install Google Calendar,
-connect a Google account, and configure the calendar rules. A public meeting
-request can then be approved in the Vekil inbox and verified in Google
-Calendar.
-
-For repeat development without resetting Runtime credentials:
+### 3. Start and test the Runtime
 
 ```bash
-pnpm dev:local
+pnpm local:run
 ```
 
-The detailed workflow is in [Local development](docs/local-development.md).
+Return to the App project in Builder, run the Runtime test, and release that
+same tested candidate. You can then install Google Calendar, connect a Google
+account, configure scheduling rules, and exercise the public request flow.
+
+The complete acceptance sequence is in
+[Local development](docs/local-development.md).
 
 ## Repository map
 
@@ -84,7 +77,7 @@ apps/runtime/
   NestJS host, OAuth, encrypted credentials, protocol verification, storage
 
 scripts/
-  Deterministic local lifecycle and controlled provider checks
+  Runtime setup, signing, local lifecycle, and controlled provider checks
 
 infra/local/
   Isolated PostgreSQL service for the Runtime

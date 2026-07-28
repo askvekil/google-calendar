@@ -6,7 +6,7 @@ import {
   appPrepareInstallationRequestSchema,
   appProtocolVersion,
   type AppInstallationGrant
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 import { describe, expect, it } from "vitest";
 import {
   GoogleCalendarConnectionService,
@@ -419,7 +419,11 @@ class MemoryConnectionStore implements GoogleCalendarConnectionStore {
     currentTime: Date
   ) {
     const completion = this.completions.get(tokenHash) ?? null;
-    if (!completion || completion.expiresAt <= currentTime || !sameAuthority(completion, authority)) {
+    if (
+      !completion ||
+      completion.expiresAt <= currentTime ||
+      !sameAuthority(completion, authority)
+    ) {
       return null;
     }
     this.completions.delete(tokenHash);

@@ -1,4 +1,4 @@
-import { AppInstallationConnectionStatus, AppRuntimeErrorCode } from "@vekil/app-sdk";
+import { AppInstallationConnectionStatus, AppRuntimeErrorCode } from "@vekil/app-sdk/runtime";
 import type {
   GoogleCalendarAuthorizationSession,
   GoogleCalendarCompletion,

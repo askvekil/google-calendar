@@ -11,9 +11,6 @@ It is created in `packages/app/src/definition.ts` with `defineRemoteApp`.
 provider name. `publication` contains support and legal links shown for this
 official App.
 
-Vekil associates the submitted Definition with the signed-in developer and
-assigns the published App identity and release metadata.
-
 ## Connection
 
 The App declares one required OAuth connection and four permission groups:

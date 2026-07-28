@@ -2,7 +2,8 @@ import { generateKeyPairSync } from "node:crypto";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { AppSignatureAlgorithm, compileAppDefinitionOrThrow } from "@vekil/app-sdk";
+import { AppSignatureAlgorithm } from "@vekil/app-sdk/runtime";
+import { createAppTestKit } from "@vekil/app-sdk/testing";
 import { createGoogleCalendarDefinition } from "@vekil/google-calendar-app";
 import { afterAll, describe, expect, it } from "vitest";
 import { readGoogleCalendarRuntimeConfig } from "../runtime-config";
@@ -97,19 +98,7 @@ describe("Google Calendar Runtime configuration", () => {
 });
 
 function writeManifest(baseUrl: string): string {
-  const manifest = compileAppDefinitionOrThrow(createGoogleCalendarDefinition({ baseUrl }), {
-    appId: "calendar-runtime-config-test",
-    appOfficial: false,
-    developer: {
-      handle: "@komronrakhim",
-      id: "builder-komronrakhim",
-      name: "Komron Rakhimov",
-      officialTeamMember: false,
-      verified: true
-    },
-    releaseVersion: "1.0.0",
-    slug: "calendar-runtime-config-test"
-  });
+  const { manifest } = createAppTestKit(createGoogleCalendarDefinition({ baseUrl }));
   const path = join(
     fixtureDirectory,
     new URL(baseUrl).protocol === "https:" ? "production.json" : "development.json"

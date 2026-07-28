@@ -10,7 +10,7 @@ import {
   type AppInstallationGrant,
   type AppPrepareInstallationRequest,
   type AppPrepareInstallationResponse
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 import { googleCalendarProviderScopes } from "../contracts";
 import {
   GoogleCalendarOAuthError,

@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { AppInstallationConnectionStatus } from "@vekil/app-sdk";
+import { AppInstallationConnectionStatus } from "@vekil/app-sdk/runtime";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { PrismaGoogleCalendarConnectionStore } from "../connection-store";
 import { createRuntimePrismaClient, type RuntimePrismaClient } from "../prisma-client";

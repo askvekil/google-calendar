@@ -21,7 +21,7 @@
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
     "@vekil/google-calendar-app": "workspace:*",
-    "@vekil/app-sdk": "0.4.0",
+    "@vekil/app-sdk": "0.5.2",
     "dotenv": "17.2.3",
     "pg": "8.22.0",
     "reflect-metadata": "0.2.2",

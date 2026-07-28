@@ -1,14 +1,18 @@
 import {
+  AppBubbleActionType,
+  BubbleActionRiskLevel,
+  BubbleAudience,
+  BubbleContentVisibility,
+  BubbleOrigin,
+  BubbleSensitivity
+} from "@vekil/app-sdk/bubbles";
+import {
   AppExecutionStatus,
   AppRuntimeErrorCode,
-  BubbleActionRiskLevel,
-  BubbleActionType,
-  BubbleContentVisibility,
-  BubbleSensitivity,
   appContextArtifactInputKey,
   appExecuteActionResponseSchema,
   type AppInstallationGrant
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 import { describe, expect, it } from "vitest";
 import {
   GoogleCalendarActionKey,
@@ -127,9 +131,7 @@ describe("Google Calendar execution acceptance", () => {
           resultKey: "availability"
         }),
         expect.objectContaining({
-          artifactId: googleCalendarTestBindings.artifactId(
-            GoogleCalendarArtifactKey.MEETING_SLOT
-          ),
+          artifactId: googleCalendarTestBindings.artifactId(GoogleCalendarArtifactKey.MEETING_SLOT),
           resultKey: "meeting-slot-1",
           visibilityLevel: "PUBLIC_REQUESTER"
         })
@@ -137,7 +139,7 @@ describe("Google Calendar execution acceptance", () => {
       bubbles: [
         {
           actions: [],
-          allowed_origins: expect.arrayContaining(["public-guest"]),
+          allowed_origins: expect.arrayContaining([BubbleOrigin.PUBLIC_GUEST]),
           sensitivity: BubbleSensitivity.PUBLIC,
           visibility: BubbleContentVisibility.PUBLIC_REQUESTER
         }
@@ -200,9 +202,9 @@ describe("Google Calendar execution acceptance", () => {
       expect.arrayContaining([
         expect.objectContaining({
           action_key: "select-meeting-slot-1",
-          action_type: BubbleActionType.SELECT_OPTION,
+          action_type: AppBubbleActionType.SELECT_OPTION,
           artifact_result_key: "meeting-slot-1",
-          allowed_audiences: ["PUBLIC_REQUESTER"],
+          allowed_audiences: [BubbleAudience.PUBLIC_REQUESTER],
           max_invocations: 1,
           option_group_key: "meeting-slot",
           requires_approval: false,
@@ -283,7 +285,7 @@ describe("Google Calendar execution acceptance", () => {
     expect(createCalls).toBe(0);
     expect(result.bubbles).toHaveLength(1);
     expect(result.bubbles[0]).toMatchObject({
-      allowed_origins: expect.arrayContaining(["public-guest"]),
+      allowed_origins: expect.arrayContaining([BubbleOrigin.PUBLIC_GUEST]),
       sensitivity: BubbleSensitivity.PUBLIC,
       title: "Choose another time",
       visibility: BubbleContentVisibility.PUBLIC_REQUESTER
@@ -324,10 +326,10 @@ describe("Google Calendar execution acceptance", () => {
       actions: [
         expect.objectContaining({
           action_key: "open-calendar-event",
-          allowed_audiences: ["OWNER"]
+          allowed_audiences: [BubbleAudience.OWNER]
         })
       ],
-      allowed_origins: expect.arrayContaining(["public-guest"]),
+      allowed_origins: expect.arrayContaining([BubbleOrigin.PUBLIC_GUEST]),
       facts: [
         expect.objectContaining({ label: "Start" }),
         expect.objectContaining({ label: "End" })
@@ -389,9 +391,7 @@ describe("Google Calendar execution acceptance", () => {
 
     expect(result).toMatchObject({
       status: AppExecutionStatus.SUCCEEDED,
-      outcomeId: googleCalendarTestBindings.outcomeId(
-        GoogleCalendarOutcomeKey.EVENT_CREATE_SUCCESS
-      )
+      outcomeId: googleCalendarTestBindings.outcomeId(GoogleCalendarOutcomeKey.EVENT_CREATE_SUCCESS)
     });
     expect(createCalls).toBe(1);
   });

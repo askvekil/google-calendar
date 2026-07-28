@@ -1,10 +1,9 @@
 import {
   AppContactIdentityAttribute,
   AppRuntimeHost,
-  appContactIdentityAttributeJsonSchemaKey,
-  compileAppDefinitionOrThrow
+  appContactIdentityAttributeJsonSchemaKey
 } from "@vekil/app-sdk";
-import { createAppRuntimeBindings } from "@vekil/app-sdk/runtime";
+import { createAppTestKit } from "@vekil/app-sdk/testing";
 import { describe, expect, it } from "vitest";
 import {
   GoogleCalendarActionKey,
@@ -16,26 +15,9 @@ import {
 
 describe("Google Calendar App Definition", () => {
   it("compiles into the canonical Remote App manifest", () => {
-    const manifest = compileAppDefinitionOrThrow(
-      createGoogleCalendarDefinition({ baseUrl: "https://calendar-runtime.vekil.me" }),
-      {
-        appOfficial: true,
-        appId: "calendar-runtime-test",
-        slug: "calendar-runtime-test",
-        releaseVersion: "1.0.0",
-        developer: {
-          id: "builder-komronrakhim",
-          handle: "@komronrakhim",
-          name: "Komron Rakhimov",
-          websiteUrl: "https://vekil.me",
-          xProfileUrl: "https://x.com/komronrakhim",
-          supportEmail: "support@vekil.me",
-          verified: true,
-          officialTeamMember: true
-        }
-      }
+    const { bindings, manifest } = createAppTestKit(
+      createGoogleCalendarDefinition({ baseUrl: "https://calendar-runtime.example.com" })
     );
-    const bindings = createAppRuntimeBindings(manifest);
 
     expect(manifest.runtime.host).toBe(AppRuntimeHost.REMOTE);
     expect(manifest.actions.map((action) => action.id)).toContain(
@@ -120,6 +102,5 @@ describe("Google Calendar App Definition", () => {
         }
       ]
     });
-    expect(manifest.app.developer.xProfileUrl).toBe("https://x.com/komronrakhim");
   });
 });

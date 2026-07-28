@@ -1,7 +1,7 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { access, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { appManifestSchema } from "@vekil/app-sdk";
 import {
+  appManifestSchema,
   generateAppRuntimeKeyMaterial,
   readAppRuntimeSigningIdentity
 } from "@vekil/app-sdk/runtime";
@@ -15,24 +15,30 @@ const manifestPath = resolve(
   "apps/runtime",
   values.get("VEKIL_APP_MANIFEST_PATH") ?? "artifacts/vekil.manifest.json"
 );
+try {
+  await access(manifestPath);
+} catch {
+  throw new Error(
+    [
+      "The Builder candidate manifest is missing.",
+      "Prepare a test in Vekil Builder and download its manifest to:",
+      manifestPath
+    ].join("\n")
+  );
+}
 const manifest = appManifestSchema.parse(
   JSON.parse(await readFile(manifestPath, "utf8")) as unknown
 );
 const signingIdentity = readAppRuntimeSigningIdentity({
   manifest,
   keyId: values.get("GOOGLE_CALENDAR_RUNTIME_SIGNING_KEY_ID")?.trim(),
-  privateJwkBase64url: values
-    .get("GOOGLE_CALENDAR_RUNTIME_SIGNING_PRIVATE_JWK_BASE64URL")
-    ?.trim()
+  privateJwkBase64url: values.get("GOOGLE_CALENDAR_RUNTIME_SIGNING_PRIVATE_JWK_BASE64URL")?.trim()
 });
 
 if (!signingIdentity) {
   const material = generateAppRuntimeKeyMaterial({ manifest });
   values.set("GOOGLE_CALENDAR_RUNTIME_SIGNING_KEY_ID", material.keyId);
-  values.set(
-    "GOOGLE_CALENDAR_RUNTIME_SIGNING_PRIVATE_JWK_BASE64URL",
-    material.privateJwkBase64url
-  );
+  values.set("GOOGLE_CALENDAR_RUNTIME_SIGNING_PRIVATE_JWK_BASE64URL", material.privateJwkBase64url);
 }
 
 const output = lines.map((line) => {
@@ -42,7 +48,7 @@ const output = lines.map((line) => {
 });
 
 await writeFile(envPath, `${output.join("\n")}\n`, { mode: 0o600 });
-process.stdout.write(`Runtime signing identity is ready for ${manifest.app.slug}.\n`);
+process.stdout.write("Runtime signing identity is ready.\n");
 
 function readEnvironmentValues(lines: string[]): Map<string, string> {
   const values = new Map<string, string>();

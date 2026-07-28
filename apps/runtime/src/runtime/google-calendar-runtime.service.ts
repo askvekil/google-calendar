@@ -1,6 +1,9 @@
 import { Injectable, type OnApplicationShutdown } from "@nestjs/common";
-import type { AppJwks } from "@vekil/app-sdk";
-import { createRemoteAppRuntime, type RemoteAppRuntime } from "@vekil/app-sdk/runtime";
+import {
+  createRemoteAppRuntime,
+  type AppJwks,
+  type RemoteAppRuntime
+} from "@vekil/app-sdk/runtime";
 import {
   GoogleCalendarConnectionService,
   GoogleCalendarHttpOAuthClient,

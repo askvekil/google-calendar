@@ -1,14 +1,7 @@
-import { AppPlanStatus } from "@vekil/app-sdk";
+import { AppPlanStatus } from "@vekil/app-sdk/runtime";
 import { describe, expect, it } from "vitest";
-import {
-  GoogleCalendarActionKey,
-  GoogleCalendarIntentKey,
-  planGoogleCalendarAction
-} from "..";
-import {
-  createCalendarPlanRequest,
-  googleCalendarTestBindings
-} from "./fixtures/runtime-requests";
+import { GoogleCalendarActionKey, GoogleCalendarIntentKey, planGoogleCalendarAction } from "..";
+import { createCalendarPlanRequest, googleCalendarTestBindings } from "./fixtures/runtime-requests";
 
 describe("Google Calendar planning acceptance", () => {
   it("starts with purpose and a preferred window without asking for email too early", () => {
@@ -44,9 +37,7 @@ describe("Google Calendar planning acceptance", () => {
       status: AppPlanStatus.READY,
       actions: [
         {
-          actionId: googleCalendarTestBindings.actionId(
-            GoogleCalendarActionKey.GET_AVAILABILITY
-          ),
+          actionId: googleCalendarTestBindings.actionId(GoogleCalendarActionKey.GET_AVAILABILITY),
           input: {
             calendarIds: ["primary"],
             durationMinutes: 45,
@@ -75,9 +66,7 @@ describe("Google Calendar planning acceptance", () => {
       status: AppPlanStatus.READY,
       actions: [
         {
-          actionId: googleCalendarTestBindings.actionId(
-            GoogleCalendarActionKey.CREATE_EVENT
-          ),
+          actionId: googleCalendarTestBindings.actionId(GoogleCalendarActionKey.CREATE_EVENT),
           input: {
             attendeeEmails: ["alex@example.com"],
             calendarId: "primary",
@@ -118,9 +107,7 @@ describe("Google Calendar planning acceptance", () => {
       actions: [
         {
           input: {
-            description: expect.stringContaining(
-              "Purpose: Discuss a frontend architecture review"
-            ),
+            description: expect.stringContaining("Purpose: Discuss a frontend architecture review"),
             summary: "Discuss a frontend architecture review - Alex"
           }
         }
@@ -190,9 +177,7 @@ describe("Google Calendar planning acceptance", () => {
       status: AppPlanStatus.READY,
       actions: [
         {
-          actionId: googleCalendarTestBindings.actionId(
-            GoogleCalendarActionKey.UPDATE_EVENT
-          ),
+          actionId: googleCalendarTestBindings.actionId(GoogleCalendarActionKey.UPDATE_EVENT),
           input: {
             eventId: "event-1",
             schedulingConstraints: {

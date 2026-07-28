@@ -1,7 +1,5 @@
-import { spawn, spawnSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { spawn } from "node:child_process";
 import { resolve } from "node:path";
-import { appManifestSchema } from "@vekil/app-sdk";
 import { config } from "dotenv";
 
 config({ path: resolve(process.cwd(), ".env"), quiet: true });
@@ -37,23 +35,11 @@ const exitPromise = new Promise<never>((_resolve, reject) => {
 
 try {
   await Promise.race([waitForRuntime(healthUrl, 30_000), exitPromise]);
-  const publication = spawnSync("pnpm", ["app:local:publish"], {
-    cwd: process.cwd(),
-    env: process.env,
-    stdio: "inherit"
-  });
-  if (publication.error) throw publication.error;
-  if (publication.status !== 0) {
-    throw new Error(`Local App publication failed with status ${publication.status ?? "unknown"}.`);
-  }
-  const manifest = appManifestSchema.parse(
-    JSON.parse(
-      readFileSync(resolve(process.cwd(), "artifacts/vekil.manifest.json"), "utf8")
-    ) as unknown
-  );
-  const appUrl = new URL(`/apps/${manifest.app.slug}`, webBaseUrl).toString();
+  const builderUrl = new URL("/apps/build", webBaseUrl).toString();
   process.stdout.write(
-    ["Google Calendar is ready.", `Open ${appUrl} to install it.`].join("\n") + "\n"
+    ["Google Calendar Runtime is ready.", `Return to ${builderUrl} and run the Runtime test.`].join(
+      "\n"
+    ) + "\n"
   );
   await exitPromise;
 } catch (error) {

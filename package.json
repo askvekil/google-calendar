@@ -15,8 +15,6 @@
   "type": "module",
   "scripts": {
     "dev": "pnpm --filter @vekil/google-calendar-runtime dev",
-    "dev:local": "pnpm local:prepare && tsx scripts/run-local.ts",
-    "dev:clean": "pnpm local:reset && tsx scripts/run-local.ts",
     "start": "pnpm --filter @vekil/google-calendar-runtime start",
     "build": "pnpm db:generate && pnpm -r --if-present build",
     "typecheck": "tsc --noEmit && pnpm -r --if-present typecheck",
@@ -27,12 +25,12 @@
     "definition:build": "pnpm --filter @vekil/google-calendar-app definition:build",
     "definition:validate": "pnpm --filter @vekil/google-calendar-app definition:validate",
     "local:env": "tsx scripts/prepare-local-environment.ts",
-    "local:setup": "pnpm local:env && pnpm infra:up && pnpm db:generate && pnpm db:migrate:deploy && pnpm definition:build && pnpm app:local:prepare && tsx scripts/configure-runtime-signing.ts",
+    "local:setup": "pnpm local:env && pnpm infra:up && pnpm db:generate && pnpm db:migrate:deploy && pnpm definition:build",
     "local:prepare": "pnpm local:stop && pnpm local:setup",
     "local:reset": "pnpm local:stop && pnpm infra:reset && pnpm local:setup",
+    "local:run": "pnpm runtime:configure && tsx scripts/run-local.ts",
     "local:stop": "tsx scripts/stop-local-runtime.ts",
-    "app:local:prepare": "tsx scripts/sync-local-app.ts prepare",
-    "app:local:publish": "tsx scripts/sync-local-app.ts publish",
+    "runtime:configure": "tsx scripts/configure-runtime-signing.ts",
     "infra:up": "docker compose -f infra/local/compose.yaml up -d --wait",
     "infra:down": "docker compose -f infra/local/compose.yaml down",
     "infra:reset": "docker compose -f infra/local/compose.yaml down --volumes --remove-orphans",
@@ -44,7 +42,7 @@
     "postinstall": "pnpm db:generate"
   },
   "devDependencies": {
-    "@vekil/app-sdk": "0.4.0",
+    "@vekil/app-sdk": "0.5.2",
     "@vekil/google-calendar-app": "workspace:*",
     "@eslint/js": "10.0.1",
     "@types/node": "26.1.0",

@@ -1,9 +1,11 @@
 import { readFileSync } from "node:fs";
 import { isAbsolute, resolve } from "node:path";
 import { z } from "zod";
-import { AppRuntimeHost, appManifestSchema, type AppManifest } from "@vekil/app-sdk";
 import {
+  AppRuntimeHost,
+  appManifestSchema,
   readAppRuntimeSigningIdentity,
+  type AppManifest,
   type AppProtocolSigningIdentity
 } from "@vekil/app-sdk/runtime";
 

@@ -1,16 +1,18 @@
 import { DateTime } from "luxon";
 import {
+  AppBubbleActionType,
+  AppBubbleType,
   BubbleActionRiskLevel,
-  BubbleActionType,
+  BubbleAudience,
   BubbleBadgeTone,
   BubbleContentVisibility,
+  BubbleOrigin,
   BubbleSensitivity,
-  BubbleType,
   BubbleVariant,
-  bubbleDescriptorSchema,
+  appBubbleDescriptorSchema,
   bubbleSchemaVersion,
-  type BubbleDescriptor
-} from "@vekil/app-sdk";
+  type AppBubbleDescriptor
+} from "@vekil/app-sdk/bubbles";
 import {
   AppExecutionStatus,
   AppRuntimeErrorCode,
@@ -21,7 +23,7 @@ import {
   type AppExecuteActionResponse,
   type AppInstallationGrant,
   type JsonObject
-} from "@vekil/app-sdk";
+} from "@vekil/app-sdk/runtime";
 import type { AppRuntimeBindings } from "@vekil/app-sdk/runtime";
 import {
   GoogleCalendarActionKey,
@@ -41,20 +43,14 @@ import {
   type GoogleCalendarProvider,
   type GoogleCalendarProviderEvent
 } from "../provider/calendar-client";
-import {
-  GoogleCalendarOAuthError,
-  GoogleCalendarOAuthErrorCode
-} from "../provider/oauth-client";
+import { GoogleCalendarOAuthError, GoogleCalendarOAuthErrorCode } from "../provider/oauth-client";
 import { findAvailableMeetingSlots, isMeetingSlotAvailable } from "./availability";
-import {
-  resolveGoogleCalendarRuntimeCopy,
-  type GoogleCalendarRuntimeCopy
-} from "./runtime-copy";
+import { resolveGoogleCalendarRuntimeCopy, type GoogleCalendarRuntimeCopy } from "./runtime-copy";
 
 const publicRequesterOrigins = [
-  "public-authenticated",
-  "public-guest",
-  "public-verified-external"
+  BubbleOrigin.PUBLIC_AUTHENTICATED,
+  BubbleOrigin.PUBLIC_GUEST,
+  BubbleOrigin.PUBLIC_VERIFIED_EXTERNAL
 ] as const;
 
 export interface GoogleCalendarCredentialProvider {
@@ -118,16 +114,11 @@ export async function executeGoogleCalendarAction(
           dependencies.bindings
         );
       default:
-        return failed(
-          request,
-          AppRuntimeErrorCode.ACTION_NOT_SUPPORTED,
-          copy.unsupportedAction
-        );
+        return failed(request, AppRuntimeErrorCode.ACTION_NOT_SUPPORTED, copy.unsupportedAction);
     }
   } catch (error) {
     if (
-      (error instanceof GoogleCalendarProviderError ||
-        error instanceof GoogleCalendarOAuthError) &&
+      (error instanceof GoogleCalendarProviderError || error instanceof GoogleCalendarOAuthError) &&
       error.reconnectRequired
     ) {
       await dependencies.credentials.invalidateCredential(request.grant);
@@ -196,12 +187,7 @@ async function executeAvailability(
       ...meetingSlotArtifacts(bindings, slots, parsed.data.timezone)
     ],
     bubbles: [
-      availabilityBubble(
-        parsed.data,
-        slots,
-        meetingSelectionRequired,
-        runtimeCopy(request)
-      )
+      availabilityBubble(parsed.data, slots, meetingSelectionRequired, runtimeCopy(request))
     ]
   });
 }
@@ -369,11 +355,11 @@ async function executeCancelEvent(
     outcomeKey: GoogleCalendarOutcomeKey.EVENT_CANCEL_SUCCESS,
     output: { provider_id: parsed.data.eventId, status: "cancelled" },
     bubbles: [
-      bubbleDescriptorSchema.parse({
+      appBubbleDescriptorSchema.parse({
         actions: [],
         badges: [{ label: copy.cancelledBadge, tone: BubbleBadgeTone.SUCCESS }],
         body: copy.cancelledBody,
-        bubble_type: BubbleType.APP_MESSAGE,
+        bubble_type: AppBubbleType.APP_MESSAGE,
         facts: [
           { label: copy.calendarLabel, value: parsed.data.calendarId },
           { label: copy.eventLabel, value: parsed.data.eventId }
@@ -430,8 +416,8 @@ function availabilityBubble(
   slots: GoogleCalendarAvailabilitySlot[],
   meetingSelectionRequired: boolean,
   copy: GoogleCalendarRuntimeCopy
-): BubbleDescriptor {
-  return bubbleDescriptorSchema.parse({
+): AppBubbleDescriptor {
+  return appBubbleDescriptorSchema.parse({
     actions: meetingSelectionRequired
       ? meetingSlotSelectionActions(slots, input.timezone, copy)
       : [],
@@ -449,7 +435,7 @@ function availabilityBubble(
         : meetingSelectionRequired
           ? copy.noMeetingOptionsBody
           : copy.noAvailabilityBody,
-    bubble_type: BubbleType.APP_MESSAGE,
+    bubble_type: AppBubbleType.APP_MESSAGE,
     allowed_origins: [...publicRequesterOrigins],
     facts: slots.map((slot, index) => ({
       label: copy.optionLabel(index + 1),
@@ -493,15 +479,12 @@ function slotUnavailableBubble(
   slots: GoogleCalendarAvailabilitySlot[],
   timezone: string,
   copy: GoogleCalendarRuntimeCopy
-): BubbleDescriptor {
-  return bubbleDescriptorSchema.parse({
+): AppBubbleDescriptor {
+  return appBubbleDescriptorSchema.parse({
     actions: meetingSlotSelectionActions(slots, timezone, copy),
     badges: [{ label: copy.timeUnavailableBadge, tone: BubbleBadgeTone.WARNING }],
-    body:
-      slots.length > 0
-        ? copy.slotUnavailableWithAlternativesBody
-        : copy.slotUnavailableBody,
-    bubble_type: BubbleType.APP_MESSAGE,
+    body: slots.length > 0 ? copy.slotUnavailableWithAlternativesBody : copy.slotUnavailableBody,
+    bubble_type: AppBubbleType.APP_MESSAGE,
     allowed_origins: [...publicRequesterOrigins],
     facts: slots.map((slot, index) => ({
       label: copy.optionLabel(index + 1),
@@ -519,11 +502,11 @@ function meetingSlotSelectionActions(
   slots: GoogleCalendarAvailabilitySlot[],
   timezone: string,
   copy: GoogleCalendarRuntimeCopy
-): BubbleDescriptor["actions"] {
+): AppBubbleDescriptor["actions"] {
   return slots.map((slot, index) => ({
     action_key: `select-meeting-slot-${index + 1}`,
-    action_type: BubbleActionType.SELECT_OPTION,
-    allowed_audiences: ["PUBLIC_REQUESTER"],
+    action_type: AppBubbleActionType.SELECT_OPTION,
+    allowed_audiences: [BubbleAudience.PUBLIC_REQUESTER],
     allowed_origins: [...publicRequesterOrigins],
     artifact_result_key: meetingSlotResultKey(index),
     label: formatMeetingSlotAction(slot, timezone, copy.locale),
@@ -545,20 +528,20 @@ function eventBubble(
   timezone: string,
   htmlLink: string | undefined,
   copy: GoogleCalendarRuntimeCopy
-): BubbleDescriptor {
-  return bubbleDescriptorSchema.parse({
+): AppBubbleDescriptor {
+  return appBubbleDescriptorSchema.parse({
     actions: htmlLink
       ? [
           {
             action_key: "open-calendar-event",
-            action_type: BubbleActionType.EXTERNAL_URL,
-            allowed_audiences: ["OWNER"],
+            action_type: AppBubbleActionType.EXTERNAL_URL,
+            allowed_audiences: [BubbleAudience.OWNER],
             allowed_origins: [
-              "agent-to-agent",
-              "agent-to-external-fallback",
-              "public-authenticated",
-              "public-guest",
-              "public-verified-external"
+              BubbleOrigin.AGENT_TO_AGENT,
+              BubbleOrigin.AGENT_TO_EXTERNAL_FALLBACK,
+              BubbleOrigin.PUBLIC_AUTHENTICATED,
+              BubbleOrigin.PUBLIC_GUEST,
+              BubbleOrigin.PUBLIC_VERIFIED_EXTERNAL
             ],
             href: htmlLink,
             label: copy.openEventAction,
@@ -569,7 +552,7 @@ function eventBubble(
       : [],
     badges: [{ label: copy.doneBadge, tone: BubbleBadgeTone.SUCCESS }],
     body: copy.eventUpdatedBody,
-    bubble_type: BubbleType.APP_MESSAGE,
+    bubble_type: AppBubbleType.APP_MESSAGE,
     allowed_origins: [...publicRequesterOrigins],
     facts: [
       { label: copy.startLabel, value: formatDateTime(start, timezone, copy.locale) },
@@ -593,7 +576,7 @@ function succeeded({
 }: {
   artifacts?: AppExecuteActionResponse["artifacts"];
   bindings: AppRuntimeBindings;
-  bubbles: BubbleDescriptor[];
+  bubbles: AppBubbleDescriptor[];
   outcomeKey: GoogleCalendarOutcomeKey;
   output: JsonObject;
   request: AppExecuteActionRequest;
@@ -611,11 +594,7 @@ function succeeded({
 }
 
 function invalidInput(request: AppExecuteActionRequest): AppExecuteActionResponse {
-  return failed(
-    request,
-    AppRuntimeErrorCode.INVALID_REQUEST,
-    runtimeCopy(request).invalidInput
-  );
+  return failed(request, AppRuntimeErrorCode.INVALID_REQUEST, runtimeCopy(request).invalidInput);
 }
 
 function mapExecutionError(
@@ -641,11 +620,7 @@ function mapExecutionError(
   }
 
   if (!(error instanceof GoogleCalendarProviderError)) {
-    return failed(
-      request,
-      AppRuntimeErrorCode.EXECUTION_FAILED,
-      copy.executionFailed
-    );
+    return failed(request, AppRuntimeErrorCode.EXECUTION_FAILED, copy.executionFailed);
   }
 
   if (
@@ -735,9 +710,7 @@ function formatMeetingSlot(
   timezone: string,
   locale: string
 ): string {
-  const start = DateTime.fromISO(slot.start, { setZone: true })
-    .setZone(timezone)
-    .setLocale(locale);
+  const start = DateTime.fromISO(slot.start, { setZone: true }).setZone(timezone).setLocale(locale);
   const end = DateTime.fromISO(slot.end, { setZone: true }).setZone(timezone).setLocale(locale);
 
   if (!start.isValid || !end.isValid) {
@@ -754,9 +727,7 @@ function formatMeetingSlotAction(
   timezone: string,
   locale: string
 ): string {
-  const start = DateTime.fromISO(slot.start, { setZone: true })
-    .setZone(timezone)
-    .setLocale(locale);
+  const start = DateTime.fromISO(slot.start, { setZone: true }).setZone(timezone).setLocale(locale);
   const end = DateTime.fromISO(slot.end, { setZone: true }).setZone(timezone).setLocale(locale);
 
   if (!start.isValid || !end.isValid) {
@@ -773,11 +744,7 @@ function formatMeetingSlotAction(
 }
 
 function formatDateTime(value: string, timezone: string, locale: string): string {
-  const dateTime = DateTime.fromISO(value, { setZone: true })
-    .setZone(timezone)
-    .setLocale(locale);
+  const dateTime = DateTime.fromISO(value, { setZone: true }).setZone(timezone).setLocale(locale);
 
-  return dateTime.isValid
-    ? dateTime.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY)
-    : value;
+  return dateTime.isValid ? dateTime.toLocaleString(DateTime.DATETIME_MED_WITH_WEEKDAY) : value;
 }

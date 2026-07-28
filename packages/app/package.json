@@ -20,7 +20,7 @@
     "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@vekil/app-sdk": "0.4.0",
+    "@vekil/app-sdk": "0.5.2",
     "luxon": "3.7.2",
     "zod": "4.4.3"
   },

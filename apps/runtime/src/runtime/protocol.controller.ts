@@ -1,5 +1,5 @@
 import { Controller, Get, Inject, Post, Req, Res, type RawBodyRequest } from "@nestjs/common";
-import { appRemoteRuntimePaths } from "@vekil/app-sdk";
+import { appRemoteRuntimePaths } from "@vekil/app-sdk/runtime";
 import type { Request as ExpressRequest, Response as ExpressResponse } from "express";
 import { GoogleCalendarRuntimeService } from "./google-calendar-runtime.service";
 

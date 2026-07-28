@@ -46,8 +46,7 @@ const copyByLanguage: Record<string, GoogleCalendarRuntimeCopy> = {
     eventLabel: "Event",
     optionsLabel: (count) => `${count} ${count === 1 ? "option" : "options"}`,
     noOpenTimes: "No open times",
-    meetingOptionsBody:
-      "These times fit the calendar rules. Choose the one that works for you.",
+    meetingOptionsBody: "These times fit the calendar rules. Choose the one that works for you.",
     availabilityBody: "These times are free under the current calendar rules.",
     noMeetingOptionsBody:
       "There is not enough free time in this window. Send another time range to continue.",
@@ -82,8 +81,7 @@ const copyByLanguage: Record<string, GoogleCalendarRuntimeCopy> = {
     eventLabel: "Событие",
     optionsLabel: (count) => `${count} ${russianOptionNoun(count)}`,
     noOpenTimes: "Нет свободного времени",
-    meetingOptionsBody:
-      "Эти варианты подходят под правила календаря. Выберите удобное время.",
+    meetingOptionsBody: "Эти варианты подходят под правила календаря. Выберите удобное время.",
     availabilityBody: "Это свободное время с учётом текущих правил календаря.",
     noMeetingOptionsBody:
       "В этом диапазоне недостаточно свободного времени. Укажите другой день или диапазон.",
@@ -107,9 +105,7 @@ const copyByLanguage: Record<string, GoogleCalendarRuntimeCopy> = {
   }
 };
 
-export function resolveGoogleCalendarRuntimeCopy(
-  locale: string
-): GoogleCalendarRuntimeCopy {
+export function resolveGoogleCalendarRuntimeCopy(locale: string): GoogleCalendarRuntimeCopy {
   const language = locale.trim().split(/[-_]/, 1)[0]?.toLowerCase() ?? "en";
   return copyByLanguage[language] ?? copyByLanguage.en!;
 }
